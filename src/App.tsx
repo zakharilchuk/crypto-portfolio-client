@@ -1,8 +1,9 @@
+import router from "./router.tsx";
+import { RouterProvider } from "react-router-dom";
+
 function App() {
   return (
-    <>
-      Crypto Portfolio Tracker
-    </>
+    <RouterProvider router={router} />
   )
 }
 
