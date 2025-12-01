@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import fetchCryptoData from "../services/fetchCryptoPrices";
 
@@ -10,24 +10,24 @@ interface CryptoToken {
 
 function Navbar() {
   const [cryptoData, setCryptoData] = useState<CryptoToken[] | null>(null);
-  useEffect(() => {
-    async function loadCryptoData() {
-      const result = await fetchCryptoData();
-      const filteredData = result.map((token: CryptoToken) => {
-        return {
-          ...token,
-          lastPrice: parseFloat(token.lastPrice).toFixed(2), 
-          priceChangePercent: parseFloat(token.priceChangePercent).toFixed(2),
-        };
-      });
-      setCryptoData(filteredData);
-    }
 
-    const intervalId = setInterval(loadCryptoData, 10000);
-    loadCryptoData();
-    
-    return () => clearInterval(intervalId);
+  const loadCryptoData = useCallback(async () => {
+    const result = await fetchCryptoData();
+    setCryptoData(
+      result.map((token: CryptoToken) => ({
+        ...token,
+        lastPrice: Number(token.lastPrice).toFixed(2),
+        priceChangePercent: Number(token.priceChangePercent).toFixed(2),
+      }))
+    );
   }, []);
+
+  useEffect(() => {
+    const start = async () => loadCryptoData();
+    start();
+    const intervalId = setInterval(start, 10000);
+    return () => clearInterval(intervalId);
+  }, [loadCryptoData]);
   return (
     <nav className="flex justify-between px-128 py-4 text-base">
       <Link to="/" className="text-balance">
@@ -46,7 +46,7 @@ function Navbar() {
                 )}
                 {token.priceChangePercent}%
               </span>
-              {index < cryptoData.length - 1 && ' | '}
+              {index < cryptoData.length - 1 && " | "}
             </p>
           ))
         ) : (
@@ -54,10 +54,10 @@ function Navbar() {
         )}
       </div>
       <div className="flex gap-4">
-        <Link to="/" className="hover:underline">
+        <Link to="/login" className="hover:underline">
           Login
         </Link>
-        <Link to="/" className="hover:underline">
+        <Link to="/signup" className="hover:underline">
           Sign up
         </Link>
       </div>
