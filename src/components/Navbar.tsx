@@ -29,7 +29,7 @@ function Navbar() {
     return () => clearInterval(intervalId);
   }, [loadCryptoData]);
   return (
-    <nav className="flex justify-between px-128 py-4 text-base">
+    <nav className="flex justify-between items-center px-128 py-4 text-base">
       <Link to="/" className="text-balance">
         CoinView
       </Link>
