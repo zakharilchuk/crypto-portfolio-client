@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 import InputForm from "../components/InputForm";
 import SubmitButtonForm from "../components/SubmitButtonForm";
 import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "../services/authService";
+import { useState } from "react";
+import { useAuthStore } from "../store/authStore";
 
 interface LoginFormData {
   email: string;
@@ -14,10 +18,21 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>();
+  const [apiError, setApiError] = useState<string | undefined>();
+  const { setAccessToken } = useAuthStore();
+  const { mutate } = useMutation({
+    mutationFn: (data: LoginFormData) => login(data),
+    onSuccess: (data) => {
+      console.log("Login successful:", data);
+      setAccessToken(data.accessToken);
+    },
+    onError: (error: { message: string }) => {
+      setApiError(error.message);
+    },
+  });
 
   const onSubmit = (data: LoginFormData) => {
-    console.log(data);
-    // Handle the login logic here
+    mutate(data);
   };
   return (
     <div className="flex flex-col gap-4 items-center justify-center mt-24">
@@ -68,6 +83,9 @@ function Login() {
           })}
           error={errors.password?.message}
         />
+        <div className="w-full">
+          {apiError && <span className="text-red-500 text-sm">{apiError}</span>}
+        </div>
         <SubmitButtonForm text="Login" />
       </form>
       <span>or</span>

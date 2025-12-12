@@ -2,6 +2,11 @@ import { Link } from "react-router-dom";
 import InputForm from "../components/InputForm";
 import SubmitButtonForm from "../components/SubmitButtonForm";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useAuthStore } from "../store/authStore";
+import { useMutation } from "@tanstack/react-query";
+import { signup } from "../services/authService";
+import type { RegisterData } from "../types/auth";
 
 interface SignupFormData {
   name: string;
@@ -16,10 +21,21 @@ function Signup() {
     handleSubmit,
     formState: { errors },
   } = useForm<SignupFormData>();
+  const [apiError, setApiError] = useState<string | undefined>();
+  const { setAccessToken } = useAuthStore();
+  const { mutate } = useMutation({
+    mutationFn: (data: RegisterData) => signup(data),
+    onSuccess: (data) => {
+      console.log("Signup successful:", data);
+      setAccessToken(data.accessToken);
+    },
+    onError: (error: { message: string }) => {
+      setApiError(error.message);
+    },
+  });
 
   const onSubmit = (data: SignupFormData) => {
-    console.log(data);
-    // Handle the signup logic here
+    mutate(data);
   };
   return (
     <div className="flex flex-col gap-4 items-center justify-center mt-24">
@@ -73,11 +89,11 @@ function Signup() {
               message: "Password is required.",
             },
             pattern: {
-                value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-                message:
-                  'Password must contain at least one lowercase letter, one uppercase letter, one number, one special character.',
-              },
+              value:
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+              message:
+                "Password must contain at least one lowercase letter, one uppercase letter, one number, one special character.",
+            },
             minLength: {
               value: 8,
               message: "Password must be at least 8 characters long.",
@@ -98,6 +114,9 @@ function Signup() {
           })}
           error={errors.confirmPassword?.message}
         />
+        <div className="w-full">
+          {apiError && <span className="text-red-500 text-sm">{apiError}</span>}
+        </div>
         <SubmitButtonForm text="Sign up" />
       </form>
       <span>or</span>

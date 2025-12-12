@@ -1,1 +1,1 @@
-# Crypto Portfolio Client
+Crypto Portfolio Client
