@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InputForm from "../components/InputForm";
 import SubmitButtonForm from "../components/SubmitButtonForm";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../services/authService";
 import type { RegisterData } from "../types/auth";
@@ -23,11 +23,13 @@ function Signup() {
   } = useForm<SignupFormData>();
   const [apiError, setApiError] = useState<string | undefined>();
   const { setAccessToken } = useAuthStore();
+  const navigate = useNavigate();
   const { mutate } = useMutation({
     mutationFn: (data: RegisterData) => signup(data),
     onSuccess: (data) => {
       console.log("Signup successful:", data);
       setAccessToken(data.accessToken);
+      navigate("/dashboard");
     },
     onError: (error: { message: string }) => {
       setApiError(error.message);

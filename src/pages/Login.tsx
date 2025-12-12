@@ -1,11 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InputForm from "../components/InputForm";
 import SubmitButtonForm from "../components/SubmitButtonForm";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/authService";
 import { useState } from "react";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 
 interface LoginFormData {
   email: string;
@@ -18,6 +18,7 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>();
+  const navigate = useNavigate();
   const [apiError, setApiError] = useState<string | undefined>();
   const { setAccessToken } = useAuthStore();
   const { mutate } = useMutation({
@@ -25,6 +26,7 @@ function Login() {
     onSuccess: (data) => {
       console.log("Login successful:", data);
       setAccessToken(data.accessToken);
+      navigate("/dashboard");
     },
     onError: (error: { message: string }) => {
       setApiError(error.message);
