@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "../stores/authStore";
 
 export const instance = axios.create({
   baseURL: "http://localhost:8080/api/",
@@ -29,6 +30,7 @@ authInstance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    const { setAccessToken } = useAuthStore.getState();
     if (
       error.response.status === 401 &&
       error.config &&
@@ -40,9 +42,11 @@ authInstance.interceptors.response.use(
           withCredentials: true,
         });
         localStorage.setItem("accessToken", res.data.accessToken);
+        setAccessToken(res.data.accessToken);
         return authInstance.request(originalRequest);
       } catch (err) {
         localStorage.removeItem("accessToken");
+        setAccessToken(null);
         console.log(err);
       }
     }

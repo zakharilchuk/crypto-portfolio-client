@@ -5,6 +5,7 @@ import Login from "./pages/Login.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import Portfolios from "./pages/Portfolios.tsx";
 import Settings from "./pages/Settings.tsx";
+import ProtectedRoute from "./components/ProtectedRoutes.tsx";
 
 const router = createBrowserRouter([
   {
@@ -21,15 +22,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <DashboardPage />
+    element: <ProtectedRoute element={<DashboardPage />} />
   },
   {
     path: "/portfolios",
-    element: <Portfolios />
+    element: <ProtectedRoute element={<Portfolios />} />
   },
   {
     path: "/settings",
-    element: <Settings />
+    element: <ProtectedRoute element={<Settings />} />
   }
 ]);
 
