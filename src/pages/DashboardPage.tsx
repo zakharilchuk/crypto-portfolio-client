@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useUserStore } from "../stores/userStore";
 import { fetchUserData } from "../services/userService";
+import Sidebar from "../layouts/Sidebar";
 
 function DashboardPage() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const setUser = useUserStore((state) => state.setUser);
-  const user = useUserStore((state) => state.user);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,17 +25,11 @@ function DashboardPage() {
     }
   }, [accessToken, navigate, setUser]);
 
-  return <div>
-    <h1>Welcome to the Dashboard!</h1>
-    {user ? (
-      <div>
-        <p>User Name: {user.name}</p>
-        <p>Email: {user.email}</p>
-      </div>
-    ) : (
-      <p>Loading user data...</p>
-    )}
-  </div>;
+  return (
+    <div>
+      <Sidebar />
+    </div>
+  );
 }
 
 export default DashboardPage;
