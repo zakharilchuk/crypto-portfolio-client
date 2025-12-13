@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 import Portfolios from "./pages/Portfolios.tsx";
 import Settings from "./pages/Settings.tsx";
 import ProtectedRoute from "./components/ProtectedRoutes.tsx";
+import PortfolioItem from "./pages/PortfolioItem.tsx";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <ProtectedRoute element={<Settings />} />
+  },
+  {
+    path: "/portfolios/:id",
+    element: <ProtectedRoute element={<PortfolioItem />} />
   }
 ]);
 
