@@ -19,6 +19,8 @@
     "@tanstack/react-query": "^5.90.12",
     "@types/axios": "^0.9.36",
     "@types/react-modal": "^3.16.3",
+    "@web3icons/core": "^4.0.40",
+    "@web3icons/react": "^4.1.6",
     "axios": "^1.13.2",
     "lucide-react": "^0.561.0",
     "react": "^19.2.0",
