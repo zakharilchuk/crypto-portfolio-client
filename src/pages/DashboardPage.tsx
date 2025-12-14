@@ -7,11 +7,17 @@ import MainLayout from "../layouts/MainLayout";
 import { useDashboard } from "../hooks/useDashboard";
 import PerformanceStatsCard from "../components/PerformanceStatsCard";
 import DistributionChart from "../components/DistributionChart";
+import BaseDataGrid from "../components/dataGrid/BaseGrid";
+import { assetColumns } from "../components/dataGrid/columns/assetColumns";
+import { transactionColumns } from "../components/dataGrid/columns/transactionColumns";
 
 function DashboardPage() {
   const { data, isLoading, isError, error } = useDashboard();
   const [chartType, setChartType] = useState<"portfolios" | "assets">(
     "portfolios"
+  );
+  const [tableType, setTableType] = useState<"assets" | "transactions">(
+    "assets"
   );
   const accessToken = useAuthStore((state) => state.accessToken);
   const setUser = useUserStore((state) => state.setUser);
@@ -91,6 +97,40 @@ function DashboardPage() {
               />
             )}
           </div>
+        </div>
+        <div>
+          <div className=" mb-4">
+            <div className="text-xl">
+              <button
+                onClick={() => setTableType("assets")}
+                className={`mr-2 ${
+                  tableType === "transactions" ? "text-gray-300" : ""
+                }`}
+              >
+                Assets
+              </button>
+              <button
+                onClick={() => setTableType("transactions")}
+                className={`mr-2 ${
+                  tableType === "assets" ? "text-gray-300" : ""
+                }`}
+              >
+                Transactions
+              </button>
+            </div>
+          </div>
+          {tableType === "assets" ? (
+            <BaseDataGrid
+              rows={data.assets}
+              columns={assetColumns}
+              sortField="totalValue"
+            />
+          ) : (
+            <BaseDataGrid
+              rows={data.transactions}
+              columns={transactionColumns}
+            />
+          )}
         </div>
       </div>
     </MainLayout>

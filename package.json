@@ -22,6 +22,7 @@
     "@web3icons/core": "^4.0.40",
     "@web3icons/react": "^4.1.6",
     "axios": "^1.13.2",
+    "dayjs": "^1.11.19",
     "lucide-react": "^0.561.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
