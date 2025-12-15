@@ -10,6 +10,10 @@ import DistributionChart from "../components/DistributionChart";
 import { assetColumns } from "../components/dataGrid/columns/assetColumns";
 import { transactionColumns } from "../components/dataGrid/columns/transactionsColumns";
 import BaseDataGrid from "../components/dataGrid/BaseGrid";
+import { useQuery } from "@tanstack/react-query";
+import { getAllCoins } from "../services/coinService";
+import type { Coin } from "../types/coin";
+import CreateTransactionModal from "../components/modals/CreateTransactionModal";
 
 function PortfolioItem() {
   const { id } = useParams<{ id: string }>();
@@ -17,15 +21,25 @@ function PortfolioItem() {
     throw new Error("Portfolio ID is required and have to be a number");
   }
 
-  const { portfolioQuery, updatePortfolio, deletePortfolio } = usePortfolioItem(
-    Number(id)
-  );
+  const {
+    portfolioQuery,
+    updatePortfolio,
+    deletePortfolio,
+    createTransaction,
+  } = usePortfolioItem(Number(id));
 
   const { data, isLoading, isError } = portfolioQuery;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] =
+    useState(false);
+  const { data: coinsData } = useQuery<Coin[]>({
+    queryKey: ["coins"],
+    queryFn: getAllCoins,
+  });
 
   const [newPortfolioName, setNewPortfolioName] = useState(
     data?.portfolio.name || ""
@@ -113,7 +127,12 @@ function PortfolioItem() {
           <div className="flex justify-between w-full items-center">
             <h2 className="text-2xl mb-2">{data?.portfolio.name}</h2>
             <div className="flex gap-4 items-center">
-              <button>Add new transaction</button>
+              <button
+                className="hover:text-gray-400 hover:cursor-pointer"
+                onClick={() => setIsAddTransactionModalOpen(true)}
+              >
+                Add new transaction
+              </button>
               <Ellipsis color="#000000" onClick={toggleMenu} />
             </div>
           </div>
@@ -181,6 +200,15 @@ function PortfolioItem() {
           </>
         )}
       </div>
+      <CreateTransactionModal
+        isOpen={isAddTransactionModalOpen}
+        onClose={() => setIsAddTransactionModalOpen(false)}
+        coins={coinsData || []}
+        portfolioId={Number(id)}
+        onCreateTransaction={(payload) => {
+          createTransaction.mutate(payload);
+        }}
+      />
 
       {isMenuOpen && (
         <Modal

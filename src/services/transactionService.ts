@@ -11,3 +11,19 @@ export async function fetchingTransactionsByPortfolioId(portfolioId: number) {
     throw error;
   }
 }
+
+export async function createTransaction(transactionData: {
+  portfolioId: number;
+  coinId: number;
+  amount: number;
+  price: number;
+  date: string;
+}) {
+  try {
+    const response = await authInstance.post<Transaction>(`/portfolio/${transactionData.portfolioId}/transactions`, transactionData);
+    return response.data;
+  } catch (error) {
+    console.log("Error creating transaction:", error);
+    throw error;
+  }
+}
