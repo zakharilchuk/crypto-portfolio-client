@@ -54,16 +54,6 @@ export const transactionColumns: GridColDef[] = [
     headerAlign: "left",
   },
   {
-    field: "portfolio",
-    headerName: "Portfolio",
-    flex: 1,
-    align: "left",
-    headerAlign: "left",
-    renderCell: (params: GridCellParams) => {
-      return params.row.portfolio.name;
-    },
-  },
-  {
     field: "date",
     headerName: "Date",
     flex: 1,
@@ -71,6 +61,20 @@ export const transactionColumns: GridColDef[] = [
     headerAlign: "left",
     renderCell: (params: GridCellParams) => {
       return dayjs(params.row.date).format("MMM DD, YYYY");
+    },
+  },
+];
+
+export const transactionColumnsWithPortfolio: GridColDef[] = [
+  ...transactionColumns,
+  {
+    field: "portfolio",
+    headerName: "Portfolio",
+    flex: 1,
+    align: "left",
+    headerAlign: "left",
+    renderCell: (params: GridCellParams) => {
+      return params.row.portfolio.name;
     },
   },
 ];

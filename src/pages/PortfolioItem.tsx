@@ -1,69 +1,37 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
-import type { Transaction } from "../types/transaction";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Portfolio } from "../types/portfolio";
-import {
-  deletePortfolio,
-  fetchingPortfolioById,
-  updatePortfolio,
-} from "../services/portfolioService";
-import { fetchingTransactionsByPortfolioId } from "../services/transactionService";
 import { Ellipsis } from "lucide-react";
 import { useState } from "react";
 import Modal from "react-modal";
 import SubmitButtonForm from "../components/SubmitButtonForm";
+import { usePortfolioItem } from "../hooks/usePortfolio";
+import PerformanceStatsCard from "../components/PerformanceStatsCard";
+import DistributionChart from "../components/DistributionChart";
+import { assetColumns } from "../components/dataGrid/columns/assetColumns";
+import { transactionColumns } from "../components/dataGrid/columns/transactionsColumns";
+import BaseDataGrid from "../components/dataGrid/BaseGrid";
 
 function PortfolioItem() {
-  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  if (!id || isNaN(Number(id))) {
+    throw new Error("Portfolio ID is required and have to be a number");
+  }
+
+  const { portfolioQuery, updatePortfolio, deletePortfolio } = usePortfolioItem(
+    Number(id)
+  );
+
+  const { data, isLoading, isError } = portfolioQuery;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const queryClient = useQueryClient();
-  const { id } = useParams<{ id: string }>();
-  const isValidId = !isNaN(Number(id));
-  const portfolioId = Number(id);
-  const {
-    data: portfolio,
-    isLoading: isPortfolioLoading,
-    isError: isPortfolioError,
-    error: portfolioError,
-  } = useQuery<Portfolio>({
-    queryKey: ["portfolio", portfolioId],
-    queryFn: () => fetchingPortfolioById(portfolioId),
-    enabled: !!portfolioId,
-    retry: false,
-  });
-  const { data: transactions, isLoading: isTransactionsLoading } = useQuery<
-    Transaction[]
-  >({
-    queryKey: ["transactions", portfolioId],
-    queryFn: () => fetchingTransactionsByPortfolioId(portfolioId),
-    enabled: !!portfolioId,
-    retry: false,
-  });
-
-
-  const deleteMutation = useMutation({
-    mutationFn: deletePortfolio,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["portfolios"] });
-      navigate("/portfolios");
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) =>
-      updatePortfolio(id, name),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["portfolio", portfolioId] });
-      await queryClient.invalidateQueries({ queryKey: ["portfolios"] });
-      setIsUpdateModalOpen(false);
-    },
-  });
 
   const [newPortfolioName, setNewPortfolioName] = useState(
-    portfolio?.name || ""
+    data?.portfolio.name || ""
+  );
+  const [tableType, setTableType] = useState<"assets" | "transactions">(
+    "assets"
   );
 
   const toggleMenu = () => {
@@ -71,7 +39,6 @@ function PortfolioItem() {
   };
 
   const handleDelete = () => {
-    
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
@@ -83,80 +50,161 @@ function PortfolioItem() {
       setIsMenuOpen(false);
     }
     setIsUpdateModalOpen(true);
-    setNewPortfolioName(portfolio?.name || "");
+    setNewPortfolioName(data?.portfolio.name || "");
   };
 
-   const handleDeletePortfolio = () => {
-    deleteMutation.mutate(portfolioId);
+  const handleDeletePortfolio = () => {
+    deletePortfolio.mutate();
     setIsDeleteModalOpen(false);
   };
 
   const handleUpdatePortfolio = (e: React.FormEvent) => {
     e.preventDefault();
-    updateMutation.mutate({ id: portfolioId, name: newPortfolioName });
+    setIsUpdateModalOpen(false);
+    updatePortfolio.mutate({ name: newPortfolioName });
   };
 
-  const isTransactionsArray = Array.isArray(transactions);
+  if (!id || isNaN(Number(id))) {
+    return (
+      <MainLayout>
+        <div className="p-12 ml-64">
+          <p>Invalid portfolio ID. Please check the URL.</p>
+          <Link
+            to="/portfolios"
+            className="hover:text-gray-400 hover:cursor-pointer"
+          >
+            Go back to portfolios
+          </Link>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="p-12 ml-64">
+          <p>Loading portfolio...</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <MainLayout>
+        <div className="p-12 ml-64">
+          <p>Error loading portfolio. Please try again later.</p>
+          <Link
+            to="/portfolios"
+            className="hover:text-gray-400 hover:cursor-pointer"
+          >
+            Go back to portfolios
+          </Link>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="p-12 ml-64">
-        {!isValidId ? (
-          <p>Invalid portfolio ID. Please check the URL.</p>
-        ) : isPortfolioLoading || isTransactionsLoading ? (
-          <p>Loading...</p>
-        ) : isPortfolioError ? (
-          <p>Error loading portfolio: {portfolioError.message}</p>
+      <div className="ml-64 py-10 px-25 flex flex-col gap-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between w-full items-center">
+            <h2 className="text-2xl mb-2">{data?.portfolio.name}</h2>
+            <div className="flex gap-4 items-center">
+              <button>Add new transaction</button>
+              <Ellipsis color="#000000" onClick={toggleMenu} />
+            </div>
+          </div>
+        </div>
+        {data.invested === 0 ? (
+          <div>
+            <p className="text-lg">
+              Your portfolio is empty. Add new transactions.
+            </p>
+          </div>
         ) : (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl mb-2">{portfolio?.name}</h2>
-              <div className="flex gap-4 items-center">
-                <button>Add new transaction</button>
-                <Ellipsis color="#000000" onClick={toggleMenu} />
-                {isMenuOpen && (
-                  <Modal
-                    isOpen={isMenuOpen}
-                    onRequestClose={toggleMenu}
-                    contentLabel="Portfolio Menu"
-                    className="absolute top-22 right-12 bg-white border border-gray-300 p-2 outline-none"
-                  >
-                    <ul>
-                      <li
-                        className="block w-full text-left px-4 py-2 border-black hover:bg-gray-100"
-                        onClick={handleUpdate}
-                      >
-                        update portfolio
-                      </li>
-                      <li
-                        className="block w-full text-left px-4 py-2 border-black hover:bg-gray-100"
-                        onClick={handleDelete}
-                      >
-                        delete portfolio
-                      </li>
-                    </ul>
-                  </Modal>
-                )}
+            <div className="flex w-full gap-10">
+              <PerformanceStatsCard
+                total={data.total}
+                pnl={data.pnl}
+                bestPerformer={data.bestPerformer}
+                worstPerformer={data.worstPerformer}
+              />
+              <div className="flex flex-col border-gray-300 border p-5 w-full">
+                <h3 className="text-lg mb-2">Distribution by Token</h3>
+                <DistributionChart
+                  data={data.distributionByToken.map((item) => ({
+                    id: item.coinId,
+                    value: item.total,
+                    label: `${item.name} (${item.percentage}%)`,
+                  }))}
+                />
               </div>
             </div>
-            <p className="mb-4">Type: {portfolio?.type}</p>
-            <h3 className="text-lg mb-2">Transactions:</h3>
-            <ul>
-              {isTransactionsArray && transactions.length > 0 ? (
-                transactions?.map((transaction: Transaction) => (
-                  <li key={transaction.id} className="mb-2">
-                    {transaction.coin.symbol} - Amount: {transaction.amount} -
-                    Price: ${transaction.price} - Date:{" "}
-                    {new Date(transaction.date).toLocaleDateString()}
-                  </li>
-                ))
+            <div>
+              <div className="mb-4">
+                <div className="text-xl">
+                  <button
+                    onClick={() => setTableType("assets")}
+                    className={`mr-2 ${
+                      tableType === "transactions" ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Assets
+                  </button>
+                  <button
+                    onClick={() => setTableType("transactions")}
+                    className={`mr-2 ${
+                      tableType === "assets" ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Transactions
+                  </button>
+                </div>
+              </div>
+              {tableType === "assets" ? (
+                <BaseDataGrid
+                  rows={data.assets}
+                  columns={assetColumns}
+                  sortField="totalValue"
+                />
               ) : (
-                <li>No transactions found.</li>
+                <BaseDataGrid
+                  rows={data.transactions}
+                  columns={transactionColumns}
+                />
               )}
-            </ul>
+            </div>
           </>
         )}
       </div>
+
+      {isMenuOpen && (
+        <Modal
+          isOpen={isMenuOpen}
+          onRequestClose={toggleMenu}
+          contentLabel="Portfolio Menu"
+          className="absolute top-22 right-12 bg-white border border-gray-300 p-2 outline-none"
+        >
+          <ul>
+            <li
+              className="block w-full text-left px-4 py-2 border-black hover:bg-gray-100"
+              onClick={handleUpdate}
+            >
+              update portfolio
+            </li>
+            <li
+              className="block w-full text-left px-4 py-2 border-black hover:bg-gray-100"
+              onClick={handleDelete}
+            >
+              delete portfolio
+            </li>
+          </ul>
+        </Modal>
+      )}
 
       {isUpdateModalOpen && (
         <Modal
@@ -164,7 +212,10 @@ function PortfolioItem() {
           onRequestClose={() => setIsUpdateModalOpen(false)}
           className="absolute top-1/2 left-1/2 bg-white border border-gray-300 p-4 outline-none transform -translate-x-1/2 -translate-y-1/2"
         >
-          <form onSubmit={handleUpdatePortfolio} className="flex flex-col gap-3">
+          <form
+            onSubmit={handleUpdatePortfolio}
+            className="flex flex-col gap-3"
+          >
             <h2 className="text-lg">update portfolio</h2>
             <input
               type="text"
@@ -190,7 +241,10 @@ function PortfolioItem() {
           className="absolute top-1/2 left-1/2 bg-white border border-gray-300 p-4 outline-none transform -translate-x-1/2 -translate-y-1/2"
         >
           <h2 className="text-lg mb-4">Confirm Delete</h2>
-          <p>Are you sure you want to delete the portfolio "{portfolio?.name}"?</p>
+          <p>
+            Are you sure you want to delete the portfolio "
+            {data?.portfolio.name}"?
+          </p>
           <div className="flex gap-4 mt-4">
             <button
               className="bg-red-700 text-white px-4 py-2 hover:opacity-85"
@@ -210,7 +264,6 @@ function PortfolioItem() {
           </div>
         </Modal>
       )}
-
     </MainLayout>
   );
 }

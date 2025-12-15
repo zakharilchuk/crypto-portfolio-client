@@ -9,7 +9,7 @@ import PerformanceStatsCard from "../components/PerformanceStatsCard";
 import DistributionChart from "../components/DistributionChart";
 import BaseDataGrid from "../components/dataGrid/BaseGrid";
 import { assetColumns } from "../components/dataGrid/columns/assetColumns";
-import { transactionColumns } from "../components/dataGrid/columns/transactionColumns";
+import { transactionColumnsWithPortfolio } from "../components/dataGrid/columns/transactionsColumns";
 
 function DashboardPage() {
   const { data, isLoading, isError, error } = useDashboard();
@@ -128,7 +128,7 @@ function DashboardPage() {
           ) : (
             <BaseDataGrid
               rows={data.transactions}
-              columns={transactionColumns}
+              columns={transactionColumnsWithPortfolio}
             />
           )}
         </div>
