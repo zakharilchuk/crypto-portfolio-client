@@ -8,6 +8,7 @@ import { useState } from "react";
 import { createPortfolio } from "../services/portfolioService";
 import BaseDataGrid from "../components/dataGrid/BaseGrid";
 import { portfolioColumns } from "../components/dataGrid/columns/portfoliosColumns";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const customStyles = {
   content: {
@@ -21,6 +22,7 @@ const customStyles = {
 };
 
 function Portfolios() {
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPortfolio, setNewPortfolio] = useState({
     name: "",
@@ -34,9 +36,16 @@ function Portfolios() {
     retry: false,
   });
 
+  const mutation = useMutation({
+    mutationFn: createPortfolio,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["portfolios"] });
+    },
+  });
+
   const handleAddPortfolio = (e: React.FormEvent) => {
     e.preventDefault();
-    createPortfolio(newPortfolio);
+    mutation.mutate(newPortfolio);
     setIsModalOpen(false);
   };
 
@@ -50,7 +59,7 @@ function Portfolios() {
 
   return (
     <MainLayout>
-      <div className="p-12 ml-64">
+      <div className="ml-64 py-10 px-25 flex flex-col gap-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl mb-4">Portfolios</h1>
           <button

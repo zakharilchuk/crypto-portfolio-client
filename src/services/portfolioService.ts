@@ -1,5 +1,5 @@
 import { authInstance } from "./axios";
-import type { Portfolio } from "../types/portfolio";
+import type { Portfolio, PortfolioAnalytics } from "../types/portfolio";
 import axios from "axios";
 
 export async function fetchPortfolios() {
@@ -42,9 +42,9 @@ export async function deletePortfolio(id: number) {
   }
 }
 
-export async function fetchingPortfolioById(id: number) {
+export async function fetchPortfolioById(id: number) {
   try {
-    const response = await authInstance.get<Portfolio>(`/portfolio/${id}`);
+    const response = await authInstance.get<PortfolioAnalytics>(`analytics/portfolios/${id}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
