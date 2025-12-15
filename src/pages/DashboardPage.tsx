@@ -46,6 +46,22 @@ function DashboardPage() {
     return <div>Error: {error?.message}</div>;
   }
 
+  const hasData =
+    data.assets.length > 0 ||
+    data.transactions.length > 0 ||
+    data.distributionByPortfolio.length > 0;
+
+  if (!hasData) {
+    return (
+      <MainLayout>
+        <div className="ml-64 py-10 px-25 flex flex-col gap-4">
+          <h1 className="text-2xl mb-4">Dashboard</h1>
+          <p>No data available. Create a new portfolio and transactions to get started.</p>
+      </div>
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="ml-64 py-10 px-25 flex flex-col gap-4">

@@ -123,7 +123,7 @@ function PortfolioItem() {
   return (
     <MainLayout>
       <div className="ml-64 py-10 px-25 flex flex-col gap-4">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center">
           <div className="flex justify-between w-full items-center">
             <h2 className="text-2xl mb-2">{data?.portfolio.name}</h2>
             <div className="flex gap-4 items-center">
@@ -139,7 +139,7 @@ function PortfolioItem() {
         </div>
         {data.invested === 0 ? (
           <div>
-            <p className="text-lg">
+            <p>
               Your portfolio is empty. Add new transactions.
             </p>
           </div>
