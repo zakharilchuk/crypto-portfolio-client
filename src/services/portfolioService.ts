@@ -4,7 +4,7 @@ import axios from "axios";
 
 export async function fetchPortfolios() {
   try {
-    const response = await authInstance.get<Portfolio[]>("/portfolio");
+    const response = await authInstance.get<Portfolio[]>("/analytics/portfolios");
     return response.data;
   } catch (error) {
     console.log("Error fetching portfolios:", error);
