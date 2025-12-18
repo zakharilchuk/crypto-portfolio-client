@@ -5,7 +5,6 @@ import Select from "react-select";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import type { Coin } from "../../types/coin";
-import { TokenIcon } from "@web3icons/react/dynamic";
 
 interface NewTransaction {
   coinId: number | null;
@@ -25,6 +24,7 @@ interface Props {
     amount: number;
     price: number;
     date: string;
+    type: "buy" | "sell";
   }) => void;
 }
 
@@ -56,6 +56,7 @@ const CreateTransactionModal = ({
       amount: Number(transaction.amount),
       price: Number(transaction.price),
       date: dayjs(transaction.date).toISOString(),
+      type: transaction.type,
     });
     onClose();
     setTransaction({
@@ -113,21 +114,6 @@ const CreateTransactionModal = ({
             setTransaction({ ...transaction, coinId: selected?.value || 0 })
           }
           placeholder="Select a coin..."
-          formatOptionLabel={({ value, label }) => {
-            const coin = coins.find((c) => c.id === value);
-            return (
-              <div className="flex items-center gap-2">
-                {coin && (
-                  <TokenIcon
-                    symbol={coin.symbol}
-                    size={24}
-                    variant="background"
-                  />
-                )}
-                <span>{label}</span>
-              </div>
-            );
-          }}
           isSearchable
           styles={{
             control: (provided) => ({

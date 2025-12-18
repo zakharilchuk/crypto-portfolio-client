@@ -26,6 +26,7 @@ function PortfolioItem() {
     updatePortfolio,
     deletePortfolio,
     createTransaction,
+    syncPortfolio,
   } = usePortfolioItem(Number(id));
 
   const { data, isLoading, isError } = portfolioQuery;
@@ -78,6 +79,10 @@ function PortfolioItem() {
     updatePortfolio.mutate({ name: newPortfolioName });
   };
 
+  const handleSyncPortfolio = () => {
+    syncPortfolio.mutate();
+  };
+
   if (!id || isNaN(Number(id))) {
     return (
       <MainLayout>
@@ -127,21 +132,28 @@ function PortfolioItem() {
           <div className="flex justify-between w-full items-center">
             <h2 className="text-2xl mb-2">{data?.portfolio.name}</h2>
             <div className="flex gap-4 items-center">
-              <button
-                className="hover:text-gray-400 hover:cursor-pointer"
-                onClick={() => setIsAddTransactionModalOpen(true)}
-              >
-                Add new transaction
-              </button>
+              {data.portfolio.type === "manual" ? (
+                <button
+                  className="hover:text-gray-400 hover:cursor-pointer"
+                  onClick={() => setIsAddTransactionModalOpen(true)}
+                >
+                  Add new transaction
+                </button>
+              ) : (
+                <button
+                  className="hover:text-gray-400 hover:cursor-pointer"
+                  onClick={handleSyncPortfolio}
+                >
+                  Sync
+                </button>
+              )}
               <Ellipsis color="#000000" onClick={toggleMenu} />
             </div>
           </div>
         </div>
         {data.invested === 0 ? (
           <div>
-            <p>
-              Your portfolio is empty. Add new transactions.
-            </p>
+            <p>Your portfolio is empty. Add new transactions.</p>
           </div>
         ) : (
           <>
@@ -153,7 +165,7 @@ function PortfolioItem() {
                 worstPerformer={data.worstPerformer}
               />
               <div className="flex flex-col border-gray-300 border p-5 w-full">
-                <h3 className="text-lg mb-2">Distribution by Token</h3>
+                <h3 className="text-lg mb-2">Distribution by tokens</h3>
                 <DistributionChart
                   data={data.distributionByToken.map((item) => ({
                     id: item.coinId,
@@ -215,7 +227,7 @@ function PortfolioItem() {
           isOpen={isMenuOpen}
           onRequestClose={toggleMenu}
           contentLabel="Portfolio Menu"
-          className="absolute top-22 right-12 bg-white border border-gray-300 p-2 outline-none"
+          className="absolute top-22 right-25 bg-white border border-gray-300 p-2 outline-none"
         >
           <ul>
             <li

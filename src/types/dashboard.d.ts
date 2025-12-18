@@ -21,6 +21,8 @@ export interface DashboardAsset {
   pnl: PnL;
 }
 
+export type TransactionType = "BUY" | "SELL";
+
 export interface DashboardTransaction {
   id: number;
   coin: {
@@ -32,6 +34,7 @@ export interface DashboardTransaction {
   amount: number;
   buyPrice: number;
   date: string;
+  type: TransactionType;
 }
 
 export interface DistributionByToken {

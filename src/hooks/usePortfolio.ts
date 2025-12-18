@@ -4,6 +4,7 @@ import {
   fetchPortfolioById,
   updatePortfolio,
   deletePortfolio,
+  syncPortfolioById,
 } from "../services/portfolioService";
 import { createTransaction } from "../services/transactionService";
 import type { PortfolioAnalytics } from "../types/portfolio";
@@ -14,6 +15,7 @@ type CreateTransactionPayload = {
   amount: number;
   price: number;
   date: string;
+  type: "buy" | "sell";
 };
 
 export function usePortfolioItem(portfolioId: number) {
@@ -24,6 +26,13 @@ export function usePortfolioItem(portfolioId: number) {
     queryKey: ["portfolio", portfolioId],
     queryFn: () => fetchPortfolioById(portfolioId),
     enabled: !!portfolioId,
+  });
+
+  const syncPortfolio = useMutation({
+    mutationFn: () => syncPortfolioById(portfolioId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["portfolio", portfolioId]});
+    },
   });
 
   const updateMutation = useMutation({
@@ -60,5 +69,6 @@ export function usePortfolioItem(portfolioId: number) {
     updatePortfolio: updateMutation,
     deletePortfolio: deleteMutation,
     createTransaction: createTransactionMutation,
+    syncPortfolio: syncPortfolio,
   };
 }

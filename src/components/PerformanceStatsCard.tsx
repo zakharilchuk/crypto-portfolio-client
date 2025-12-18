@@ -52,14 +52,8 @@ function PerformanceStatsCard({
         </div>
       </div>
       <div className="flex justify-between">
-        <TopPerformerCard
-          title="Best Performer"
-          performer={bestPerformer}
-        />
-        <TopPerformerCard
-          title="Worst Performer"
-          performer={worstPerformer}
-        />
+        <TopPerformerCard title="Best Performer" performer={bestPerformer} />
+        <TopPerformerCard title="Worst Performer" performer={worstPerformer} />
       </div>
     </div>
   );

@@ -43,7 +43,7 @@ export const transactionColumns: GridColDef[] = [
   },
   {
     field: "buyPrice",
-    headerName: "Buy Price",
+    headerName: "Price",
     flex: 1,
     type: "number",
     renderCell: (params: GridCellParams) => {
@@ -52,6 +52,16 @@ export const transactionColumns: GridColDef[] = [
     },
     align: "left",
     headerAlign: "left",
+  },
+  {
+    field: "type",
+    headerName: "Type",
+    flex: 1,
+    align: "left",
+    headerAlign: "left",
+    renderCell: (params: GridCellParams) => {
+      return params.row.type;
+    },
   },
   {
     field: "date",
