@@ -10,6 +10,8 @@ import DistributionChart from "../components/DistributionChart";
 import BaseDataGrid from "../components/dataGrid/BaseGrid";
 import { assetColumns } from "../components/dataGrid/columns/assetColumns";
 import { transactionColumnsWithPortfolio } from "../components/dataGrid/columns/transactionsColumns";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function DashboardPage() {
   const { data, isLoading, isError, error } = useDashboard();
@@ -39,7 +41,19 @@ function DashboardPage() {
   }, [accessToken, navigate, setUser]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      // change to black color
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "black" }} />
+      </Box>
+    );
   }
 
   if (isError || !data) {
@@ -56,10 +70,13 @@ function DashboardPage() {
       <MainLayout>
         <div className="ml-64 py-10 px-25 flex flex-col gap-4">
           <h1 className="text-2xl mb-4">Dashboard</h1>
-          <p>No data available. Create a new portfolio and transactions to get started.</p>
-      </div>
+          <p>
+            No data available. Create a new portfolio and transactions to get
+            started.
+          </p>
+        </div>
       </MainLayout>
-    )
+    );
   }
 
   return (

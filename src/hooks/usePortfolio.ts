@@ -8,6 +8,7 @@ import {
 } from "../services/portfolioService";
 import { createTransaction } from "../services/transactionService";
 import type { PortfolioAnalytics } from "../types/portfolio";
+import { deleteTransaction } from "../services/transactionService";
 
 type UpdatePortfolioPayload = { name: string };
 type CreateTransactionPayload = {
@@ -26,12 +27,17 @@ export function usePortfolioItem(portfolioId: number) {
     queryKey: ["portfolio", portfolioId],
     queryFn: () => fetchPortfolioById(portfolioId),
     enabled: !!portfolioId,
+    retry: false,
+    // long polling every 10 seconds
+    refetchInterval: 10000,
+    refetchIntervalInBackground: true,
   });
+  
 
   const syncPortfolio = useMutation({
     mutationFn: () => syncPortfolioById(portfolioId),
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["portfolio", portfolioId]});
+      queryClient.invalidateQueries({ queryKey: ["portfolio", portfolioId] });
     },
   });
 
@@ -64,11 +70,19 @@ export function usePortfolioItem(portfolioId: number) {
     },
   });
 
+  const deleteTransactionMutation = useMutation({
+  mutationFn: (transactionId: number) => deleteTransaction(portfolioId, transactionId),
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({ queryKey: ["portfolio", portfolioId] });
+  },
+});
+
   return {
     portfolioQuery,
     updatePortfolio: updateMutation,
     deletePortfolio: deleteMutation,
     createTransaction: createTransactionMutation,
+    deleteTransaction: deleteTransactionMutation,
     syncPortfolio: syncPortfolio,
   };
 }

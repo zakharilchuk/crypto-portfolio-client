@@ -38,7 +38,7 @@ export const assetColumns: GridColDef[] = [
     align: "left",
     renderCell: (params: GridCellParams) => {
       const value = params.value as number | undefined;
-      return value != null ? `$${value.toFixed(2)}` : "-";
+      return value != null ? `$${value.toFixed(4)}` : "-";
     },
   },
   {
@@ -62,7 +62,7 @@ export const assetColumns: GridColDef[] = [
     align: "left",
     renderCell: (params: GridCellParams) => {
       const value = params.value as number | undefined;
-      return value != null ? `$${value.toFixed(2)}` : "-";
+      return value != null ? `$${value.toFixed(4)}` : "-";
     },
   },
   {
@@ -74,7 +74,7 @@ export const assetColumns: GridColDef[] = [
     align: "left",
     renderCell: (params: GridCellParams) => {
       const value = params.value as number | undefined;
-      return value != null ? `$${value.toFixed(2)}` : "-";
+      return value != null ? `$${value.toFixed(4)}` : "-";
     },
   },
   {

@@ -30,7 +30,7 @@ function Navbar() {
   }, [loadCryptoData]);
   return (
     <nav className="flex justify-between items-center px-128 py-4 text-base">
-      <Link to="/" className="text-balance">
+      <Link to="/" className="text-xl">
         CoinView
       </Link>
       <div className="flex gap-2">

@@ -9,6 +9,8 @@ import BaseDataGrid from "../components/dataGrid/BaseGrid";
 import { portfolioColumns } from "../components/dataGrid/columns/portfoliosColumns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CreatePortfolioModal from "../components/modals/CreatePortfolioModal";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 function Portfolios() {
   const queryClient = useQueryClient();
@@ -33,7 +35,19 @@ function Portfolios() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    // put it in the center of the page
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "black" }} />
+      </Box>
+    );
   }
 
   return (

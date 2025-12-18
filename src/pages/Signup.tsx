@@ -2,11 +2,10 @@ import { Link, useNavigate } from "react-router-dom";
 import InputForm from "../components/InputForm";
 import SubmitButtonForm from "../components/SubmitButtonForm";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import { useAuthStore } from "../stores/authStore";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../services/authService";
-import type { RegisterData } from "../types/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SignupFormData {
   name: string;
@@ -16,32 +15,38 @@ interface SignupFormData {
 }
 
 function Signup() {
+  const queryClient = useQueryClient();
+  const { setAccessToken } = useAuthStore();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignupFormData>();
-  const [apiError, setApiError] = useState<string | undefined>();
-  const { setAccessToken } = useAuthStore();
-  const navigate = useNavigate();
-  const { mutate } = useMutation({
-    mutationFn: (data: RegisterData) => signup(data),
+
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: signup,
     onSuccess: (data) => {
-      console.log("Signup successful:", data);
       setAccessToken(data.accessToken);
-      navigate("/dashboard");
-    },
-    onError: (error: { message: string }) => {
-      setApiError(error.message);
+
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+
+      navigate("/email-verification", { replace: true });
     },
   });
 
-  const onSubmit = (data: SignupFormData) => {
-    mutate(data);
+  const onSubmit = (formData: SignupFormData) => {
+    mutate({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
   };
+
   return (
     <div className="flex flex-col gap-4 items-center justify-center mt-24">
-      <Link to="/" className="text-3xl">
+      <Link to="/" className="text-xl">
         CoinView
       </Link>
       <p className="text-gray-500">
@@ -117,9 +122,11 @@ function Signup() {
           error={errors.confirmPassword?.message}
         />
         <div className="w-full">
-          {apiError && <span className="text-red-500 text-sm">{apiError}</span>}
+          {error && <span className="text-red-500 text-sm">{error.message}</span>}
         </div>
-        <SubmitButtonForm text="Sign up" />
+        <SubmitButtonForm
+          text={isPending ? "Creating account..." : "Sign up"}
+        />
       </form>
       <span>or</span>
       <p>

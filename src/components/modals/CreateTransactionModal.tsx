@@ -18,21 +18,23 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   coins: Coin[];
-  portfolioId: number;
-  onCreateTransaction: (payload: {
-    coinId: number;
-    amount: number;
-    price: number;
-    date: string;
-    type: "buy" | "sell";
-  }) => void;
+  onCreateTransaction: (
+    payload: {
+      coinId: number;
+      amount: number;
+      price: number;
+      date: string;
+      type: "buy" | "sell";
+    },
+    onSuccess?: () => void,
+    onError?: (message: string) => void
+  ) => void;
 }
 
 const CreateTransactionModal = ({
   isOpen,
   onClose,
   coins,
-  portfolioId,
   onCreateTransaction,
 }: Props) => {
   const coinOptions = coins.map((coin) => ({
@@ -144,7 +146,16 @@ const CreateTransactionModal = ({
           className="border border-[#f2f2f2] px-3 py-2 focus:outline-none w-full"
           value={transaction.amount}
           onChange={(e) => {
-            const value = e.target.value;
+            let value = e.target.value;
+
+            if (
+              value.length > 1 &&
+              value.startsWith("0") &&
+              !value.startsWith("0.")
+            ) {
+              value = value.replace(/^0+/, "");
+            }
+
             if (/^\d*\.?\d*$/.test(value)) {
               setTransaction({ ...transaction, amount: value });
             }
@@ -162,7 +173,16 @@ const CreateTransactionModal = ({
             className="border border-[#f2f2f2] pl-7 pr-3 py-2 focus:outline-none w-full"
             value={transaction.price}
             onChange={(e) => {
-              const value = e.target.value;
+              let value = e.target.value;
+
+              if (
+                value.length > 1 &&
+                value.startsWith("0") &&
+                !value.startsWith("0.")
+              ) {
+                value = value.replace(/^0+/, "");
+              }
+
               if (/^\d*\.?\d*$/.test(value)) {
                 setTransaction({ ...transaction, price: value });
               }

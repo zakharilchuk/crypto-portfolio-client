@@ -1,16 +1,39 @@
 import { Navigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import type { JSX } from "react";
+import { useMe } from "../hooks/useMe";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import { type JSX } from "react";
 
-interface ProtectedRouteProps {
-  element: JSX.Element;
-}
-
-const ProtectedRoute = ({ element }: ProtectedRouteProps) => {
-  const accessToken = useAuthStore((state) => state.accessToken);
+const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const { data: user, isLoading, isError } = useMe();
 
   if (!accessToken) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "black" }} />
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!user.isEmailVerified) {
+    return <Navigate to="/email-verification" replace />;
   }
 
   return element;

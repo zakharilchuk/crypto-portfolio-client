@@ -4,7 +4,7 @@ import SubmitButtonForm from "../components/SubmitButtonForm";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/authService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../stores/authStore";
 
 interface LoginFormData {
@@ -18,9 +18,14 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>();
-  const navigate = useNavigate();
   const [apiError, setApiError] = useState<string | undefined>();
-  const { setAccessToken } = useAuthStore();
+  const { accessToken, setAccessToken } = useAuthStore();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (accessToken) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [accessToken, navigate]);
   const { mutate } = useMutation({
     mutationFn: (data: LoginFormData) => login(data),
     onSuccess: (data) => {
@@ -38,7 +43,7 @@ function Login() {
   };
   return (
     <div className="flex flex-col gap-4 items-center justify-center mt-24">
-      <Link to="/" className="text-3xl">
+      <Link to="/" className="text-xl">
         CoinView
       </Link>
       <p className="text-gray-500">

@@ -88,3 +88,29 @@ export const transactionColumnsWithPortfolio: GridColDef[] = [
     },
   },
 ];
+
+export const transactionColumnsWithActions = (
+  onDelete: (id: number) => void
+): GridColDef[] => [
+  ...transactionColumns,
+  {
+    field: "actions",
+    headerName: "Actions",
+    flex: 0.5,
+    align: "left",
+    headerAlign: "left",
+    renderCell: (params: GridCellParams) => {
+      return (
+        <button
+          className="text-red-500 underline"
+          onClick={() => {
+            const transactionId = params.row.id;
+            onDelete(transactionId);
+          }}
+        >
+          Delete
+        </button>
+      );
+    },
+  },
+];

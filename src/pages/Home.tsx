@@ -1,8 +1,16 @@
 import Navbar from "../components/Navbar";
 import coinsHomeImg from "../assets/coins-home.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUserStore } from "../stores/userStore";
 
 function Home() {
+  const navigate = useNavigate();
+  const { user } = useUserStore();
+
+  if (user) {
+    navigate("/dashboard");
+  }
+
   return (
     <>
       <header>
@@ -11,10 +19,9 @@ function Home() {
       <main>
         <section className="flex flex-col items-center text-center gap-12 py-32">
           <div className="flex flex-col gap-4">
-            <h1 className="text-5xl">Track crypto. Stay ahead</h1>
+            <h1 className="text-5xl">Track crypto activity.</h1>
             <p className="text-2xl text-gray-500">
-              Stay updated with the latest trends and insights in the
-              cryptocurrency market.
+              View crypto data and portfolio changes.
             </p>
           </div>
           <img src={coinsHomeImg} alt="Coins" />

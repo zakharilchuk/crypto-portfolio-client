@@ -8,12 +8,17 @@ import { usePortfolioItem } from "../hooks/usePortfolio";
 import PerformanceStatsCard from "../components/PerformanceStatsCard";
 import DistributionChart from "../components/DistributionChart";
 import { assetColumns } from "../components/dataGrid/columns/assetColumns";
-import { transactionColumns } from "../components/dataGrid/columns/transactionsColumns";
+import { transactionColumnsWithActions } from "../components/dataGrid/columns/transactionsColumns";
 import BaseDataGrid from "../components/dataGrid/BaseGrid";
 import { useQuery } from "@tanstack/react-query";
 import { getAllCoins } from "../services/coinService";
 import type { Coin } from "../types/coin";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 import CreateTransactionModal from "../components/modals/CreateTransactionModal";
+import { AxiosError } from "axios";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 function PortfolioItem() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +31,7 @@ function PortfolioItem() {
     updatePortfolio,
     deletePortfolio,
     createTransaction,
+    deleteTransaction,
     syncPortfolio,
   } = usePortfolioItem(Number(id));
 
@@ -34,6 +40,20 @@ function PortfolioItem() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
 
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] =
     useState(false);
@@ -101,11 +121,16 @@ function PortfolioItem() {
 
   if (isLoading) {
     return (
-      <MainLayout>
-        <div className="p-12 ml-64">
-          <p>Loading portfolio...</p>
-        </div>
-      </MainLayout>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "black" }} />
+      </Box>
     );
   }
 
@@ -205,7 +230,9 @@ function PortfolioItem() {
               ) : (
                 <BaseDataGrid
                   rows={data.transactions}
-                  columns={transactionColumns}
+                  columns={transactionColumnsWithActions(
+                    deleteTransaction.mutate
+                  )}
                 />
               )}
             </div>
@@ -216,11 +243,46 @@ function PortfolioItem() {
         isOpen={isAddTransactionModalOpen}
         onClose={() => setIsAddTransactionModalOpen(false)}
         coins={coinsData || []}
-        portfolioId={Number(id)}
-        onCreateTransaction={(payload) => {
-          createTransaction.mutate(payload);
+        onCreateTransaction={(payload, onSuccess, onError) => {
+          createTransaction.mutate(payload, {
+            onSuccess: () => {
+              setSnackbarMessage("Transaction created successfully");
+              setSnackbarSeverity("success");
+              setSnackbarOpen(true);
+              onSuccess?.();
+            },
+            onError: (error: Error) => {
+              let message = "Something went wrong";
+
+              if (error instanceof AxiosError) {
+                message =
+                  (error.response?.data as { message: string })?.message ||
+                  message;
+              }
+
+              setSnackbarMessage(message);
+              setSnackbarSeverity("error");
+              setSnackbarOpen(true);
+              onError?.(message);
+            },
+          });
         }}
       />
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       {isMenuOpen && (
         <Modal

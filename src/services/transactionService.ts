@@ -17,6 +17,7 @@ export async function createTransaction(transactionData: {
   coinId: number;
   amount: number;
   price: number;
+  type: "buy" | "sell";
   date: string;
 }) {
   try {
@@ -24,6 +25,18 @@ export async function createTransaction(transactionData: {
     return response.data;
   } catch (error) {
     console.log("Error creating transaction:", error);
+    throw error;
+  }
+}
+
+export async function deleteTransaction(portfolioId: number, transactionId: number) {
+  try {
+    const response = await authInstance.delete<{ message: string }>(
+      `portfolios/${portfolioId}/transactions/${transactionId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(`Error deleting transaction with id ${transactionId}:`, error);
     throw error;
   }
 }
