@@ -38,11 +38,13 @@ authInstance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       try {
-        const res = await authInstance.post("/auth/refresh", {
-          withCredentials: true,
-        });
-        localStorage.setItem("accessToken", res.data.accessToken);
-        setAccessToken(res.data.accessToken);
+        if (!originalRequest.url.includes("/auth/refresh")) {
+          const res = await authInstance.post("/auth/refresh", {
+            withCredentials: true,
+          });
+          localStorage.setItem("accessToken", res.data.accessToken);
+          setAccessToken(res.data.accessToken);
+        }
         return authInstance.request(originalRequest);
       } catch (err) {
         localStorage.removeItem("accessToken");

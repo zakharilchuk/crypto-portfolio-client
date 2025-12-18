@@ -25,3 +25,15 @@ export async function signup(registerData: RegisterData) {
     throw new Error("Registration failed");
   }
 }
+
+export async function logout() {
+  try {
+    const response = await instance.post("auth/logout");
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message);
+    }
+    throw new Error("Logout failed");
+  }
+}

@@ -3,7 +3,7 @@ import type { Transaction } from "../types/transaction";
 
 export async function fetchingTransactionsByPortfolioId(portfolioId: number) {
   try {
-    const response = await authInstance.get<Transaction[]>(`/portfolio/${portfolioId}/transactions`);
+    const response = await authInstance.get<Transaction[]>(`/portfolios/${portfolioId}/transactions`);
     console.log(response.data);
     return response.data;
   } catch (error) {
@@ -20,7 +20,7 @@ export async function createTransaction(transactionData: {
   date: string;
 }) {
   try {
-    const response = await authInstance.post<Transaction>(`/portfolio/${transactionData.portfolioId}/transactions`, transactionData);
+    const response = await authInstance.post<Transaction>(`/portfolios/${transactionData.portfolioId}/transactions`, transactionData);
     return response.data;
   } catch (error) {
     console.log("Error creating transaction:", error);
