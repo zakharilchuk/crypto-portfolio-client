@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import fetchCryptoData from "../services/fetchCryptoPrices";
 import { Box, CircularProgress } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 
 interface CryptoToken {
   symbol: string;
@@ -10,25 +10,20 @@ interface CryptoToken {
 }
 
 function Navbar() {
-  const [cryptoData, setCryptoData] = useState<CryptoToken[] | null>(null);
-
-  const loadCryptoData = useCallback(async () => {
-    const result = await fetchCryptoData();
-    setCryptoData(
-      result.map((token: CryptoToken) => ({
+  const { data: cryptoData } = useQuery<CryptoToken[]>({
+    queryKey: ["cryptoPrices"],
+    queryFn: async () => {
+      const result = await fetchCryptoData();
+      return result.map((token: CryptoToken) => ({
         ...token,
         lastPrice: Number(token.lastPrice).toFixed(2),
         priceChangePercent: Number(token.priceChangePercent).toFixed(2),
-      }))
-    );
-  }, []);
-
-  useEffect(() => {
-    const start = async () => loadCryptoData();
-    start();
-    const intervalId = setInterval(start, 10000);
-    return () => clearInterval(intervalId);
-  }, [loadCryptoData]);
+      }));
+    },
+    refetchInterval: 10000,
+    staleTime: 5000,
+    refetchOnWindowFocus: false,
+  });
 
   if (!cryptoData) {
     return (
