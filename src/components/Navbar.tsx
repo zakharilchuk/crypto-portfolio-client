@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import fetchCryptoData from "../services/fetchCryptoPrices";
+import { Box, CircularProgress } from "@mui/material";
 
 interface CryptoToken {
   symbol: string;
@@ -28,8 +29,24 @@ function Navbar() {
     const intervalId = setInterval(start, 10000);
     return () => clearInterval(intervalId);
   }, [loadCryptoData]);
+
+  if (!cryptoData) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "black" }} />
+      </Box>
+    );
+  }
+
   return (
-    <nav className="flex justify-between items-center px-128 py-4 text-base">
+    <nav className="flex justify-between items-center px-[15vw] py-4 text-base">
       <Link to="/" className="text-xl">
         CoinView
       </Link>

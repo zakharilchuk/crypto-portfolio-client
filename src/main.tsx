@@ -12,7 +12,7 @@ Modal.setAppElement("#root");
 
 const theme = createTheme({
   typography: {
-    fontFamily: "Teachers, sans-serif",
+    fontFamily: "Outfit, sans-serif",
   },
 });
 

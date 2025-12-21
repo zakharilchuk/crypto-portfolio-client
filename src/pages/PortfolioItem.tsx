@@ -200,7 +200,7 @@ function PortfolioItem() {
                 />
               </div>
             </div>
-            <div>
+            <div className='w-full'>
               <div className="mb-4">
                 <div className="text-xl">
                   <button
