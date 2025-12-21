@@ -37,7 +37,7 @@ function BaseDataGrid<T extends object>({
           sx={{
             border: 1,
             borderColor: "#cbd5e1",
-            fontFamily: "Teachers, sans-serif",
+            fontFamily: "Outfit, sans-serif",
             fontSize: "16px",
             borderRadius: 0,
             boxShadow: "none",
